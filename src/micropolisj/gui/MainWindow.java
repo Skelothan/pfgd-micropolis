@@ -1033,25 +1033,28 @@ public class MainWindow extends JFrame
 
 		b4.add(makeToolBtn(MicropolisTool.POWERPLANT));
 		b4.add(makeToolBtn(MicropolisTool.NUCLEAR));
-
+		
+		//Add the wind farm icon to the tool bar
 		c.gridy++;
 		Box b5 = new Box(BoxLayout.X_AXIS);
 		gridBox.add(b5,c);
-
-		b5.add(makeToolBtn(MicropolisTool.STADIUM));
-		b5.add(makeToolBtn(MicropolisTool.SEAPORT));
+		
+		b5.add(makeToolBtn(MicropolisTool.WIND_FARM));
 
 		c.gridy++;
 		Box b6 = new Box(BoxLayout.X_AXIS);
 		gridBox.add(b6,c);
 
-		b6.add(makeToolBtn(MicropolisTool.AIRPORT));
-		
-		//Add the NEW_BUILDING icon to the tool bar
+		b6.add(makeToolBtn(MicropolisTool.STADIUM));
+		b6.add(makeToolBtn(MicropolisTool.SEAPORT));
+
 		c.gridy++;
 		Box b7 = new Box(BoxLayout.X_AXIS);
 		gridBox.add(b7,c);
-		b7.add(makeToolBtn(MicropolisTool.NEW_BUILDING));
+
+		b7.add(makeToolBtn(MicropolisTool.AIRPORT));
+		
+		
 
 		// add glue to make all elements align toward top
 		c.gridy++;

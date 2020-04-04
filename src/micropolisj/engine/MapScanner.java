@@ -86,7 +86,7 @@ class MapScanner extends TileBehavior
 			doSeaport();
 			return;
 		case WIND_FARM:
-			doWindFarm(); //Call the NEW_BUILDING placeholder function
+			doWindFarm(); //Call the wind farm function
 			return;
 		default:
 			assert false;
@@ -214,6 +214,7 @@ class MapScanner extends TileBehavior
 	{
 		//Very basic building functionality. Checks for power and does "repair"
 		boolean powerOn = checkZonePower();
+		city.windFarmCount++;
 		if ((city.cityTime % 8) == 0) {
 			repairZone(WIND_FARM, 6);
 		}

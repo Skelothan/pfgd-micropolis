@@ -1033,7 +1033,7 @@ public class Micropolis
 		// of powerplants connected to your city.
 		//
 
-		int maxPower = coalCount * 700 + nuclearCount * 2000;
+		int maxPower = coalCount * 700 + nuclearCount * 2000 + totalWindPower;
 		int numPower = 0;
 
 		// This is kind of odd algorithm, but I haven't the heart to rewrite it at
