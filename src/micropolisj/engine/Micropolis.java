@@ -2126,6 +2126,8 @@ public class Micropolis
 		coalCount = 0;
 		nuclearCount = 0;
 		windFarmCount = 0;
+		totalWindPower = 0;
+		int tempWindSum = 0;
 
 		powerPlants.clear();
 		for (int y = 0; y < map.length; y++) {
@@ -2142,10 +2144,24 @@ public class Micropolis
 				else if (tile == WIND_FARM) {
 					windFarmCount++;
 					powerPlants.add(new CityLocation(x,y));
+					
+					// Calculate wind power production:
+					// Sum up wind speed in all wind farm tiles:
+					tempWindSum = 0;
+					for (int dy = -1; dy < 5; dy++) {
+						for (int dx = -1; dx < 5; dx++) {
+							tempWindSum += windMem[y+dy][x+dx];
+						}
+					}
+					// Multipy by 100, then average together:
+					tempWindSum *= 100;
+					tempWindSum /= 36;
+					// Add to total wind power
+					totalWindPower += tempWindSum;
 				}
 			}
 		}
-
+		// System.out.println("Total Wind Power: " + String.valueOf(totalWindPower));
 		powerScan();
 		newPower = true;
 	}
@@ -2554,7 +2570,7 @@ public class Micropolis
 		checkGrowth();
 
 		int totalZoneCount = resZoneCount + comZoneCount + indZoneCount;
-		int powerCount = nuclearCount + coalCount;
+		int powerCount = nuclearCount + coalCount + windFarmCount;
 
 		int z = cityTime % 64;
 		switch (z) {

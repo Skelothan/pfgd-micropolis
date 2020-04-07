@@ -115,6 +115,7 @@ class MapScanner extends TileBehavior
 		boolean newPower = (
 			tile == NUCLEAR ||
 			tile == POWERPLANT ||
+			tile == WIND_FARM ||
 			city.hasPower(xpos,ypos)
 			);
 
@@ -218,6 +219,11 @@ class MapScanner extends TileBehavior
 		if ((city.cityTime % 8) == 0) {
 			repairZone(WIND_FARM, 6);
 		}
+		
+		city.powerPlants.add(new CityLocation(xpos, ypos));
+		
+		// Updates the wind power contribution
+		city.checkPowerMap();
 	}
 
 	void doFireStation()
