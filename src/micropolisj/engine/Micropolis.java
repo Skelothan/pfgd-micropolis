@@ -27,6 +27,12 @@ public class Micropolis
 	// full size arrays
 	char [][] map;
 	boolean [][] powerMap;
+	
+	/**
+	 * For each tile of the city, the wind speed (0-8).
+	 * Created in init() by makeWind()
+	 */
+	int [][] windMem;
 
 	// half-size arrays
 
@@ -224,6 +230,9 @@ public class Micropolis
 	{
 		map = new char[height][width];
 		powerMap = new boolean[height][width];
+		windMem = new int[height][width];
+		
+		windMem = makeWind(windMem, height, width);
 
 		int hX = (width+1)/2;
 		int hY = (height+1)/2;
@@ -233,6 +242,7 @@ public class Micropolis
 		crimeMem = new int[hY][hX];
 		popDensity = new int[hY][hX];
 		trfDensity = new int[hY][hX];
+		
 
 		int qX = (width+3)/4;
 		int qY = (height+3)/4;
@@ -251,6 +261,23 @@ public class Micropolis
 
 		centerMassX = hX;
 		centerMassY = hY;
+	}
+	
+	int[][] makeWind(int[][] windMem, int height, int width) {
+		Random rand = new Random();
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				windMem[i][j] = rand.nextInt(9);
+			}
+		}
+		
+		windMem = doSmooth(windMem);
+		// windMem = doSmooth(windMem);
+		// windMem = doSmooth(windMem);
+		
+		System.out.println(Arrays.deepToString(windMem));
+		
+		return windMem;
 	}
 
 	void fireCensusChanged()
@@ -2098,6 +2125,7 @@ public class Micropolis
 	{
 		coalCount = 0;
 		nuclearCount = 0;
+		windFarmCount = 0;
 
 		powerPlants.clear();
 		for (int y = 0; y < map.length; y++) {
@@ -2109,6 +2137,10 @@ public class Micropolis
 				}
 				else if (tile == POWERPLANT) {
 					coalCount++;
+					powerPlants.add(new CityLocation(x,y));
+				}
+				else if (tile == WIND_FARM) {
+					windFarmCount++;
 					powerPlants.add(new CityLocation(x,y));
 				}
 			}
@@ -2672,6 +2704,8 @@ public class Micropolis
 		z = rateOGMem[ypos/8][xpos/8];
 		z = z < 0 ? 16 : z == 0 ? 17 : z <= 100 ? 18 : 19;
 		zs.growthRate = z + 1;
+		
+		zs.windSpeed = windMem[ypos][xpos];
 
 		return zs;
 	}
