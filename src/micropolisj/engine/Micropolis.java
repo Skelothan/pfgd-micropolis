@@ -264,16 +264,34 @@ public class Micropolis
 	}
 	
 	int[][] makeWind(int[][] windMem, int height, int width) {
+		int[][] windTemp = new int[height/4][width/4];
 		Random rand = new Random();
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				windMem[i][j] = rand.nextInt(9);
+		// Create a low-res map
+		for (int i = 0; i < height/4; i++) {
+			for (int j = 0; j < width/4; j++) {
+				windTemp[i][j] = rand.nextInt(8);
 			}
 		}
 		
-		windMem = doSmooth(windMem);
-		// windMem = doSmooth(windMem);
-		// windMem = doSmooth(windMem);
+		// Upscale the low-res map 4x
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				windMem[i][j] = windTemp[i/4][j/4];
+			}
+		}
+		
+		// Smooth it four times
+		for (int i = 0; i < 4; i++) windMem = doSmooth(windMem);
+		
+		// Bound the wind values to 0-8 inclusive
+		// Also, cut wind values in half since the smoothing seems to increase the overall values.
+		// Luckily, four smooths seems to make the range almost double.
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				windMem[i][j] /= 2;
+				windMem[i][j] = Math.min(Math.max(0, windMem[i][j]),8);
+			}
+		}
 		
 		System.out.println(Arrays.deepToString(windMem));
 		
