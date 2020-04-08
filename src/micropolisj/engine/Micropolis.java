@@ -32,7 +32,7 @@ public class Micropolis
 	 * For each tile of the city, the wind speed (0-8).
 	 * Created in init() by makeWind()
 	 */
-	int [][] windMem;
+	public int [][] windMem;
 
 	// half-size arrays
 
