@@ -1017,7 +1017,7 @@
 964   wind_farm@64,0           (conducts)
 965   wind_farm@80,0           (conducts)
 966   wind_farm@0,16           (conducts)
-967   wind_farm@16,16    (zone)(conducts)(building=6x6)(behavior=WIND_FARM)(description=#14)
+967   wind_farm@16,16    (zone)(conducts)(building=6x6)(behavior=WIND_FARM)(description=#28)
 968   wind_farm@32,16          (conducts)
 969   wind_farm@48,16          (conducts)
 970   wind_farm@64,16          (conducts)
