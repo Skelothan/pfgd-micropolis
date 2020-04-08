@@ -265,11 +265,10 @@ public class Micropolis
 	
 	int[][] makeWind(int[][] windMem, int height, int width) {
 		int[][] windTemp = new int[height/4][width/4];
-		Random rand = new Random();
 		// Create a low-res map
 		for (int i = 0; i < height/4; i++) {
 			for (int j = 0; j < width/4; j++) {
-				windTemp[i][j] = rand.nextInt(8);
+				windTemp[i][j] = PRNG.nextInt(8);
 			}
 		}
 		
@@ -1314,6 +1313,7 @@ public class Micropolis
 		public int [] money = new int[240];
 		public int [] pollution = new int[240];
 		public int [] crime = new int[240];
+		public int [] wind = new int[240];
 		int resMax;
 		int comMax;
 		int indMax;
@@ -2122,11 +2122,41 @@ public class Micropolis
 			}
 		}
 	}
+	
+	void loadWind(DataInputStream dis)
+		throws IOException
+	{
+		for (int x = 0; x < DEFAULT_WIDTH; x++)
+		{
+			for (int y = 0; y < DEFAULT_HEIGHT; y++)
+			{
+				int w = dis.readInt();
+				windMem[y][x] = (int) w;
+			}
+		}
+	}
+	
+	void writeWind(DataOutputStream out)
+		throws IOException
+	{
+		for (int x = 0; x < DEFAULT_WIDTH; x++)
+		{
+			for (int y = 0; y < DEFAULT_HEIGHT; y++)
+			{
+				int w = windMem[y][x];
+				out.writeInt(w);
+			}
+		}
+	}
+	
+	
 
 	public void load(File filename)
 		throws IOException
 	{
 		FileInputStream fis = new FileInputStream(filename);
+		// Don't read a header, since no CTY file made with this mod will have one.
+		/*
 		if (fis.getChannel().size() > 27120) {
 			// some editions of the classic Simcity game
 			// start the file off with a 128-byte header,
@@ -2136,6 +2166,7 @@ public class Micropolis
 			byte [] bbHeader = new byte[128];
 			fis.read(bbHeader);
 		}
+		*/
 		load(fis);
 	}
 
@@ -2196,6 +2227,7 @@ public class Micropolis
 		loadHistoryArray(history.money, dis);
 		loadMisc(dis);
 		loadMap(dis);
+		loadWind(dis);
 		dis.close();
 
 		checkPowerMap();
@@ -2223,6 +2255,7 @@ public class Micropolis
 		writeHistoryArray(history.money, out);
 		writeMisc(out);
 		writeMap(out);
+		writeWind(out);
 		out.close();
 	}
 
