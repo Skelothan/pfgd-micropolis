@@ -165,6 +165,10 @@ public class NotificationPane extends JPanel
 		c1.gridy = ++c2.gridy;
 		p.add(new JLabel(strings.getString("notification.growth_lbl")), c1);
 		p.add(new JLabel(growthRateStr), c2);
+		
+		c1.gridy = ++c2.gridy;
+		p.add(new JLabel(strings.getString("notification.wind_lbl")), c1);
+		p.add(new JLabel(String.valueOf(zone.windSpeed) + " m/s"), c2);
 
 		c1.gridy++;
 		c1.gridwidth = 2;

@@ -27,6 +27,12 @@ public class Micropolis
 	// full size arrays
 	char [][] map;
 	boolean [][] powerMap;
+	
+	/**
+	 * For each tile of the city, the wind speed (0-8).
+	 * Created in init() by makeWind()
+	 */
+	public int [][] windMem;
 
 	// half-size arrays
 
@@ -123,6 +129,8 @@ public class Micropolis
 	int stadiumCount;
 	int coalCount;
 	int nuclearCount;
+	int windFarmCount;
+	int totalWindPower;
 	int seaportCount;
 	int airportCount;
 
@@ -222,6 +230,9 @@ public class Micropolis
 	{
 		map = new char[height][width];
 		powerMap = new boolean[height][width];
+		windMem = new int[height][width];
+		
+		windMem = makeWind(windMem, height, width);
 
 		int hX = (width+1)/2;
 		int hY = (height+1)/2;
@@ -231,6 +242,7 @@ public class Micropolis
 		crimeMem = new int[hY][hX];
 		popDensity = new int[hY][hX];
 		trfDensity = new int[hY][hX];
+		
 
 		int qX = (width+3)/4;
 		int qY = (height+3)/4;
@@ -249,6 +261,40 @@ public class Micropolis
 
 		centerMassX = hX;
 		centerMassY = hY;
+	}
+	
+	int[][] makeWind(int[][] windMem, int height, int width) {
+		int[][] windTemp = new int[height/4][width/4];
+		// Create a low-res map
+		for (int i = 0; i < height/4; i++) {
+			for (int j = 0; j < width/4; j++) {
+				windTemp[i][j] = PRNG.nextInt(8);
+			}
+		}
+		
+		// Upscale the low-res map 4x
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				windMem[i][j] = windTemp[i/4][j/4];
+			}
+		}
+		
+		// Smooth it four times
+		for (int i = 0; i < 4; i++) windMem = doSmooth(windMem);
+		
+		// Bound the wind values to 0-8 inclusive
+		// Also, cut wind values in half since the smoothing seems to increase the overall values.
+		// Luckily, four smooths seems to make the range almost double.
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				windMem[i][j] /= 2;
+				windMem[i][j] = Math.min(Math.max(0, windMem[i][j]),8);
+			}
+		}
+		
+		System.out.println(Arrays.deepToString(windMem));
+		
+		return windMem;
 	}
 
 	void fireCensusChanged()
@@ -1031,7 +1077,7 @@ public class Micropolis
 		// of powerplants connected to your city.
 		//
 
-		int maxPower = coalCount * 700 + nuclearCount * 2000;
+		int maxPower = coalCount * 700 + nuclearCount * 2000 + totalWindPower;
 		int numPower = 0;
 
 		// This is kind of odd algorithm, but I haven't the heart to rewrite it at
@@ -1267,6 +1313,7 @@ public class Micropolis
 		public int [] money = new int[240];
 		public int [] pollution = new int[240];
 		public int [] crime = new int[240];
+		public int [] wind = new int[240];
 		int resMax;
 		int comMax;
 		int indMax;
@@ -1461,7 +1508,7 @@ public class Micropolis
 		bb.put("INDUSTRIAL", new MapScanner(this, MapScanner.B.INDUSTRIAL));
 		bb.put("COAL", new MapScanner(this, MapScanner.B.COAL));
 		bb.put("NUCLEAR", new MapScanner(this, MapScanner.B.NUCLEAR));
-		bb.put("NEW_BUILDING", new MapScanner(this, MapScanner.B.NEW_BUILDING));
+		bb.put("WIND_FARM", new MapScanner(this, MapScanner.B.WIND_FARM));
 		bb.put("FIRESTATION", new MapScanner(this, MapScanner.B.FIRESTATION));
 		bb.put("POLICESTATION", new MapScanner(this, MapScanner.B.POLICESTATION));
 		bb.put("STADIUM_EMPTY", new MapScanner(this, MapScanner.B.STADIUM_EMPTY));
@@ -2075,11 +2122,41 @@ public class Micropolis
 			}
 		}
 	}
+	
+	void loadWind(DataInputStream dis)
+		throws IOException
+	{
+		for (int x = 0; x < DEFAULT_WIDTH; x++)
+		{
+			for (int y = 0; y < DEFAULT_HEIGHT; y++)
+			{
+				int w = dis.readInt();
+				windMem[y][x] = (int) w;
+			}
+		}
+	}
+	
+	void writeWind(DataOutputStream out)
+		throws IOException
+	{
+		for (int x = 0; x < DEFAULT_WIDTH; x++)
+		{
+			for (int y = 0; y < DEFAULT_HEIGHT; y++)
+			{
+				int w = windMem[y][x];
+				out.writeInt(w);
+			}
+		}
+	}
+	
+	
 
 	public void load(File filename)
 		throws IOException
 	{
 		FileInputStream fis = new FileInputStream(filename);
+		// Don't read a header, since no CTY file made with this mod will have one.
+		/*
 		if (fis.getChannel().size() > 27120) {
 			// some editions of the classic Simcity game
 			// start the file off with a 128-byte header,
@@ -2089,6 +2166,7 @@ public class Micropolis
 			byte [] bbHeader = new byte[128];
 			fis.read(bbHeader);
 		}
+		*/
 		load(fis);
 	}
 
@@ -2096,6 +2174,9 @@ public class Micropolis
 	{
 		coalCount = 0;
 		nuclearCount = 0;
+		windFarmCount = 0;
+		totalWindPower = 0;
+		int tempWindSum = 0;
 
 		powerPlants.clear();
 		for (int y = 0; y < map.length; y++) {
@@ -2109,9 +2190,27 @@ public class Micropolis
 					coalCount++;
 					powerPlants.add(new CityLocation(x,y));
 				}
+				else if (tile == WIND_FARM) {
+					windFarmCount++;
+					powerPlants.add(new CityLocation(x,y));
+					
+					// Calculate wind power production:
+					// Sum up wind speed in all wind farm tiles:
+					tempWindSum = 0;
+					for (int dy = -1; dy < 5; dy++) {
+						for (int dx = -1; dx < 5; dx++) {
+							tempWindSum += windMem[y+dy][x+dx];
+						}
+					}
+					// Multipy by 100, then average together:
+					tempWindSum *= 100;
+					tempWindSum /= 36;
+					// Add to total wind power
+					totalWindPower += tempWindSum;
+				}
 			}
 		}
-
+		// System.out.println("Total Wind Power: " + String.valueOf(totalWindPower));
 		powerScan();
 		newPower = true;
 	}
@@ -2128,6 +2227,7 @@ public class Micropolis
 		loadHistoryArray(history.money, dis);
 		loadMisc(dis);
 		loadMap(dis);
+		loadWind(dis);
 		dis.close();
 
 		checkPowerMap();
@@ -2155,6 +2255,7 @@ public class Micropolis
 		writeHistoryArray(history.money, out);
 		writeMisc(out);
 		writeMap(out);
+		writeWind(out);
 		out.close();
 	}
 
@@ -2520,7 +2621,7 @@ public class Micropolis
 		checkGrowth();
 
 		int totalZoneCount = resZoneCount + comZoneCount + indZoneCount;
-		int powerCount = nuclearCount + coalCount;
+		int powerCount = nuclearCount + coalCount + windFarmCount;
 
 		int z = cityTime % 64;
 		switch (z) {
@@ -2670,6 +2771,8 @@ public class Micropolis
 		z = rateOGMem[ypos/8][xpos/8];
 		z = z < 0 ? 16 : z == 0 ? 17 : z <= 100 ? 18 : 19;
 		zs.growthRate = z + 1;
+		
+		zs.windSpeed = windMem[ypos][xpos];
 
 		return zs;
 	}

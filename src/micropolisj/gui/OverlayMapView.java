@@ -112,14 +112,18 @@ public class OverlayMapView extends JComponent
 		return bi;
 	}
 
-	static final Color VAL_LOW       = new Color(0xbfbfbf);
-	static final Color VAL_MEDIUM    = new Color(0xffff00);
-	static final Color VAL_HIGH      = new Color(0xff7f00);
-	static final Color VAL_VERYHIGH  = new Color(0xff0000);
-	static final Color VAL_PLUS      = new Color(0x007f00);
-	static final Color VAL_VERYPLUS  = new Color(0x00e600);
-	static final Color VAL_MINUS     = new Color(0xff7f00);
-	static final Color VAL_VERYMINUS = new Color(0xffff00);
+	static final Color VAL_LOW          = new Color(0xbfbfbf);
+	static final Color VAL_MEDIUM       = new Color(0xffff00);
+	static final Color VAL_HIGH         = new Color(0xff7f00);
+	static final Color VAL_VERYHIGH     = new Color(0xff0000);
+	static final Color VAL_PLUS         = new Color(0x007f00);
+	static final Color VAL_VERYPLUS     = new Color(0x00e600);
+	static final Color VAL_MINUS        = new Color(0xff7f00);
+	static final Color VAL_VERYMINUS    = new Color(0xffff00);
+	static final Color VAL_LOWWIND      = new Color(0xceedfb);
+	static final Color VAL_MEDIUMWIND   = new Color(0x6bcaf3);
+	static final Color VAL_HIGHWIND     = new Color(0x12a2e2); // Cid? That you?
+	static final Color VAL_VERYHIGHWIND = new Color(0x0a5c81);
 
 	private Color getCI(int x)
 	{
@@ -145,6 +149,20 @@ public class OverlayMapView extends JComponent
 			return VAL_VERYMINUS;
 		else if (x < -20)
 			return VAL_MINUS;
+		else
+			return null;
+	}
+	
+	private Color getCI_wind(int x)
+	{
+		if (x < 2)
+			return VAL_LOWWIND;
+		else if (x < 4)
+			return VAL_MEDIUMWIND;
+		else if (x < 6)
+			return VAL_HIGHWIND;
+		else if (x <= 8)
+			return VAL_VERYHIGHWIND;
 		else
 			return null;
 	}
@@ -211,6 +229,17 @@ public class OverlayMapView extends JComponent
 		for (int y = 0; y < A.length; y++) {
 			for (int x = 0; x < A[y].length; x++) {
 				maybeDrawRect(gr, getCI(A[y][x]),x*24,y*24,24,24);
+			}
+		}
+	}
+	
+	private void drawWindSpeed(Graphics gr)
+	{
+		int [][] A = engine.windMem;
+
+		for (int y = 0; y < A.length; y++) {
+			for (int x = 0; x < A[y].length; x++) {
+				maybeDrawRect(gr, getCI_wind(A[y][x]),x*3,y*3,3,3);
 			}
 		}
 	}
@@ -359,6 +388,13 @@ public class OverlayMapView extends JComponent
 				case LANDVALUE_OVERLAY:
 					tile = checkLandValueOverlay(img, x, y, tile);
 					break;
+					
+				case WIND_OVERLAY:
+					// I don't actually remember writing this.
+					// Maybe I put it in as a placeholder?
+					// Whatever the reason, it works, so I'm leaving it alone.
+					tile = 1;
+					break;
 
 				default:
 				}
@@ -390,6 +426,8 @@ public class OverlayMapView extends JComponent
 			drawRateOfGrowth(gr); break;
 		case POPDEN_OVERLAY:
 			drawPopDensity(gr); break;
+		case WIND_OVERLAY:
+			drawWindSpeed(gr); break;
 		default:
 		}
 

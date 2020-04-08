@@ -52,8 +52,8 @@ class BuildingTool extends ToolStroke
 		case AIRPORT:
 			return applyZone(eff, AIRPORT);
 			
-		case NEW_BUILDING:
-			return applyZone(eff, NEW_BUILDING); //If the tile we're applying is the NEW_BUILDING, use applyZone to place a NEW_BUILDING tile
+		case WIND_FARM:
+			return applyZone(eff, WIND_FARM); //If the tile we're applying is the wind farm, use applyZone to place a wind farm tile
 
 		default:
 			// not expected

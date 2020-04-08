@@ -27,4 +27,6 @@ public class ZoneStatus
 	public int pollution;
 	/** Number from 17 to 20, 17=Declining, 18=Stable, etc. */
 	public int growthRate;
+	/** Number from 0 to 8, representing wind speed in m/s */
+	public int windSpeed;
 }

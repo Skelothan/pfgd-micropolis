@@ -42,7 +42,7 @@ class MapScanner extends TileBehavior
 		STADIUM_FULL,
 		AIRPORT,
 		SEAPORT,
-		NEW_BUILDING; //Placeholder enum for new building. Change to building name if making a new building
+		WIND_FARM; //Placeholder enum for new building. Change to building name if making a new building
 	}
 
 	@Override
@@ -85,8 +85,8 @@ class MapScanner extends TileBehavior
 		case SEAPORT:
 			doSeaport();
 			return;
-		case NEW_BUILDING:
-			doNewBuilding(); //Call the NEW_BUILDING placeholder function
+		case WIND_FARM:
+			doWindFarm(); //Call the wind farm function
 			return;
 		default:
 			assert false;
@@ -115,6 +115,7 @@ class MapScanner extends TileBehavior
 		boolean newPower = (
 			tile == NUCLEAR ||
 			tile == POWERPLANT ||
+			tile == WIND_FARM ||
 			city.hasPower(xpos,ypos)
 			);
 
@@ -210,13 +211,19 @@ class MapScanner extends TileBehavior
 	
 	//Placeholder for a new building
 	//Look to the other do<building name>() functions to guidance on what this function should do.
-	void doNewBuilding()
+	void doWindFarm()
 	{
 		//Very basic building functionality. Checks for power and does "repair"
 		boolean powerOn = checkZonePower();
+		city.windFarmCount++;
 		if ((city.cityTime % 8) == 0) {
-			repairZone(NEW_BUILDING, 3);
+			repairZone(WIND_FARM, 6);
 		}
+		
+		city.powerPlants.add(new CityLocation(xpos, ypos));
+		
+		// Updates the wind power contribution
+		city.checkPowerMap();
 	}
 
 	void doFireStation()
