@@ -390,6 +390,9 @@ public class OverlayMapView extends JComponent
 					break;
 					
 				case WIND_OVERLAY:
+					// I don't actually remember writing this.
+					// Maybe I put it in as a placeholder?
+					// Whatever the reason, it works, so I'm leaving it alone.
 					tile = 1;
 					break;
 
